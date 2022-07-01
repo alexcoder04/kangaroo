@@ -9,13 +9,43 @@ import (
 	"os/exec"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
 const SIGRTMIN = 34
 
 var (
-	flagSigNum = flag.Int("signal", 1, "signal to listen on")
+	flagSigNum   = flag.Int("signal", 1, "signal to listen on")
+	flagInterval = flag.Int("interval", 0, "run command every so much seconds")
 )
+
+func Execute(cmd string, args []string) {
+	command := exec.Command(cmd, args...)
+
+	var stdBuffer bytes.Buffer
+	mw := io.MultiWriter(os.Stdout, &stdBuffer)
+
+	command.Stdout = mw
+	command.Stderr = mw
+
+	command.Run()
+}
+
+func ListenFor(signalNumber int, cmd string, args []string) {
+	if signalNumber == 0 {
+		fmt.Println("signal number is 0, not listening")
+		return
+	}
+	channel := make(chan os.Signal, 1)
+	signal.Notify(channel, syscall.Signal(SIGRTMIN+signalNumber))
+	fmt.Printf("waiting for signal SIGRTMIN+%d to execute %s...\n", signalNumber, cmd)
+	select {
+	case <-channel:
+		fmt.Printf("got signal, executing %s:\n", cmd)
+		Execute(cmd, args)
+		ListenFor(signalNumber, cmd, args)
+	}
+}
 
 func ListenToQuit(signalNumber int) {
 	channel := make(chan os.Signal, 1)
@@ -27,34 +57,12 @@ func ListenToQuit(signalNumber int) {
 	}
 }
 
-func ListenFor(signalNumber int, cmd string, args []string) {
-	channel := make(chan os.Signal, 1)
-	signal.Notify(channel, syscall.Signal(SIGRTMIN+signalNumber))
-	fmt.Printf("waiting for signal SIGRTMIN+%d to execute %s...\n", signalNumber, cmd)
-	select {
-	case <-channel:
-		fmt.Printf("got signal, executing %s:\n", cmd)
-		command := exec.Command(cmd, args...)
-
-		var stdBuffer bytes.Buffer
-		mw := io.MultiWriter(os.Stdout, &stdBuffer)
-
-		command.Stdout = mw
-		command.Stderr = mw
-
-		command.Run()
-
-		ListenFor(signalNumber, cmd, args)
-	}
-}
-
 func main() {
 	flag.Parse()
 
-	go ListenToQuit(1)
-	go ListenToQuit(2)
-	go ListenToQuit(3)
-	go ListenToQuit(15)
+	for _, s := range []int{1, 2, 3, 15} {
+		go ListenToQuit(s)
+	}
 
 	var cmd string
 	args := flag.CommandLine.Args()
@@ -70,5 +78,16 @@ func main() {
 		args = args[1:]
 	}
 
-	ListenFor(*flagSigNum, cmd, args)
+	if *flagInterval == 0 {
+		ListenFor(*flagSigNum, cmd, args)
+		return
+	}
+
+	go ListenFor(*flagSigNum, cmd, args)
+	fmt.Printf("executing %s in interval of %d seconds...\n", cmd, *flagInterval)
+	for {
+		time.Sleep(time.Duration(*flagInterval) * 1000000000)
+		fmt.Printf("interval of %d seconds passed, executing %s:\n", *flagInterval, cmd)
+		Execute(cmd, args)
+	}
 }
