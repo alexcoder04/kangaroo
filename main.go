@@ -1,15 +1,14 @@
 package main
 
 import (
-	"bytes"
 	"flag"
 	"fmt"
-	"io"
 	"os"
-	"os/exec"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/alexcoder04/friendly"
 )
 
 const SIGRTMIN = 34
@@ -18,18 +17,6 @@ var (
 	flagSigNum   = flag.Int("signal", 1, "signal to listen on")
 	flagInterval = flag.Int("interval", 0, "run command every so much seconds")
 )
-
-func Execute(cmd string, args []string) {
-	command := exec.Command(cmd, args...)
-
-	var stdBuffer bytes.Buffer
-	mw := io.MultiWriter(os.Stdout, &stdBuffer)
-
-	command.Stdout = mw
-	command.Stderr = mw
-
-	command.Run()
-}
 
 func ListenFor(signalNumber int, cmd string, args []string) {
 	if signalNumber == 0 {
@@ -42,7 +29,7 @@ func ListenFor(signalNumber int, cmd string, args []string) {
 	select {
 	case <-channel:
 		fmt.Printf("got signal, executing %s:\n", cmd)
-		Execute(cmd, args)
+		friendly.Run(cmd, args, "")
 		ListenFor(signalNumber, cmd, args)
 	}
 }
@@ -88,6 +75,6 @@ func main() {
 	for {
 		time.Sleep(time.Duration(*flagInterval) * 1000000000)
 		fmt.Printf("interval of %d seconds passed, executing %s:\n", *flagInterval, cmd)
-		Execute(cmd, args)
+		friendly.Run(cmd, args, "")
 	}
 }
