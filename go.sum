@@ -1,12 +1,2 @@
-github.com/alexcoder04/friendly v0.2.1 h1:2f+BP+T2+0gEwpgDrlRIq33MRIHWuFthPy+UzYaAoGg=
-github.com/alexcoder04/friendly v0.2.1/go.mod h1:EJIZyz/OH+OudrVjGY7dt+LEBe4fj8D1veWzTUB2D/w=
-github.com/alexcoder04/friendly v0.3.0 h1:VPL/DWlWtosSeZQ6ewhYEzgbvFsyK8xOg00M0Bxkp6w=
-github.com/alexcoder04/friendly v0.3.0/go.mod h1:EJIZyz/OH+OudrVjGY7dt+LEBe4fj8D1veWzTUB2D/w=
-github.com/alexcoder04/friendly v0.3.1 h1:E46HGQ6UlN78MTyyYa85O4hnBxyX6Bdd8ZWxWCugqz0=
-github.com/alexcoder04/friendly v0.3.1/go.mod h1:EJIZyz/OH+OudrVjGY7dt+LEBe4fj8D1veWzTUB2D/w=
-github.com/otiai10/copy v1.7.0 h1:hVoPiN+t+7d2nzzwMiDHPSOogsWAStewq3TwU05+clE=
-github.com/otiai10/copy v1.7.0/go.mod h1:rmRl6QPdJj6EiUqXQ/4Nn2lLXoNQjFCQbbNrxgc/t3U=
-github.com/otiai10/curr v0.0.0-20150429015615-9b4961190c95/go.mod h1:9qAhocn7zKJG+0mI8eUu6xqkFDYS2kb2saOteoSB3cE=
-github.com/otiai10/curr v1.0.0/go.mod h1:LskTG5wDwr8Rs+nNQ+1LlxRjAtTZZjtJW4rMXl6j4vs=
-github.com/otiai10/mint v1.3.0/go.mod h1:F5AjcsTsWUqX+Na9fpHb52P8pcRX2CI6A3ctIT91xUo=
-github.com/otiai10/mint v1.3.3/go.mod h1:/yxELlJQ0ufhjUwhshSj+wFjZ78CnZ48/1wtmBH1OTc=
+github.com/alexcoder04/friendly/v2 v2.0.0 h1:IHSCsqGmfEciPqEM0+xaPKpQ0NAO9GGTKe+GLLkP+Eo=
+github.com/alexcoder04/friendly/v2 v2.0.0/go.mod h1:mDdl0T9duMHVIVVTDgkXO7TE3rmjR6OO9PMdvEoqIH4=

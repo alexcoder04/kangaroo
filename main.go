@@ -8,7 +8,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/alexcoder04/friendly"
+	"github.com/alexcoder04/friendly/v2"
 )
 
 const SIGRTMIN = 34
@@ -18,30 +18,26 @@ var (
 	flagInterval = flag.Int("interval", 0, "run command every so much seconds")
 )
 
-func ListenFor(signalNumber int, cmd string, args []string) {
+func ListenFor(signalNumber int, cmd []string) {
 	if signalNumber == 0 {
 		fmt.Println("signal number is 0, not listening")
 		return
 	}
 	channel := make(chan os.Signal, 1)
 	signal.Notify(channel, syscall.Signal(SIGRTMIN+signalNumber))
-	fmt.Printf("waiting for signal SIGRTMIN+%d to execute %s...\n", signalNumber, cmd)
-	select {
-	case <-channel:
-		fmt.Printf("got signal, executing %s:\n", cmd)
-		friendly.Run(cmd, args, "")
-		ListenFor(signalNumber, cmd, args)
-	}
+	fmt.Printf("waiting for signal SIGRTMIN+%d to execute %s...\n", signalNumber, cmd[0])
+	<-channel
+	fmt.Printf("got signal, executing %s:\n", cmd[0])
+	friendly.Run(cmd, "")
+	ListenFor(signalNumber, cmd)
 }
 
 func ListenToQuit(signalNumber int) {
 	channel := make(chan os.Signal, 1)
 	signal.Notify(channel, syscall.Signal(signalNumber))
-	select {
-	case <-channel:
-		fmt.Printf("caugth signal %d, exiting\n", signalNumber)
-		os.Exit(0)
-	}
+	<-channel
+	fmt.Printf("caugth signal %d, exiting\n", signalNumber)
+	os.Exit(0)
 }
 
 func main() {
@@ -51,30 +47,21 @@ func main() {
 		go ListenToQuit(s)
 	}
 
-	var cmd string
-	args := flag.CommandLine.Args()
-	switch len(args) {
-	case 0:
-		cmd = "echo"
-		args = []string{"hello world"}
-	case 1:
-		cmd = args[0]
-		args = []string{}
-	default:
-		cmd = args[0]
-		args = args[1:]
+	cmd := flag.CommandLine.Args()
+	if len(cmd) == 0 {
+		cmd = []string{"echo", "hello kangaroo"}
 	}
 
 	if *flagInterval == 0 {
-		ListenFor(*flagSigNum, cmd, args)
+		ListenFor(*flagSigNum, cmd)
 		return
 	}
 
-	go ListenFor(*flagSigNum, cmd, args)
+	go ListenFor(*flagSigNum, cmd)
 	fmt.Printf("executing %s in interval of %d seconds...\n", cmd, *flagInterval)
 	for {
 		time.Sleep(time.Duration(*flagInterval) * 1000000000)
 		fmt.Printf("interval of %d seconds passed, executing %s:\n", *flagInterval, cmd)
-		friendly.Run(cmd, args, "")
+		friendly.Run(cmd, "")
 	}
 }
